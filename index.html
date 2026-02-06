@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ты котакбас?</title>
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    background: black;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    touch-action: manipulation; /* мобильные тапы */
+}
+
+#start {
+    position: fixed;
+    inset: 0;
+    background: black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+#start button {
+    font-size: 28px;
+    padding: 20px 50px;
+    border-radius: 18px;
+    border: none;
+}
+
+#game {
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+}
+
+button {
+    padding: 18px 40px;
+    font-size: 24px;
+    border-radius: 16px;
+    border: none;
+    margin: 10px;
+}
+
+#yes {
+    background: #00ff88;
+    color: black;
+    width: 45%;
+}
+
+#no {
+    background: red;
+    color: white;
+    width: 45%;
+}
+
+/* СКРИМЕР */
+#screamer {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 9999;
+    animation: shake 0.04s infinite;
+}
+
+#screamer img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ВСПЫШКИ */
+#flash {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 9998;
+    animation: flash 0.07s infinite;
+}
+
+@keyframes flash {
+    0% { background: red; }
+    50% { background: white; }
+    100% { background: red; }
+}
+
+@keyframes shake {
+    0% { transform: translate(0,0); }
+    25% { transform: translate(25px,-25px); }
+    50% { transform: translate(-25px,25px); }
+    75% { transform: translate(25px,25px); }
+    100% { transform: translate(0,0); }
+}
+</style>
+</head>
+<body>
+
+<div id="start">
+    <h2>Нажми, чтобы начать</h2>
+    <button id="startBtn">НАЧАТЬ</button>
+</div>
+
+<div id="game">
+    <h1>Ты котакбас?</h1>
+    <div style="display:flex; justify-content: space-around;">
+        <button id="yes">YES</button>
+        <button id="no">NO</button>
+    </div>
+</div>
+
+<div id="flash"></div>
+<div id="screamer">
+    <img id="screamerImg">
+</div>
+
+<script>
+const start = document.getElementById("start");
+const startBtn = document.getElementById("startBtn");
+const yes = document.getElementById("yes");
+const no = document.getElementById("no");
+const screamer = document.getElementById("screamer");
+const screamerImg = document.getElementById("screamerImg");
+const flash = document.getElementById("flash");
+
+let unlocked = false;
+let yesSize = 24;
+
+const sounds = [
+  "https://www.myinstants.com/media/sounds/jumpscare.mp3",
+  "https://www.myinstants.com/media/sounds/fnaf-jumpscare.mp3",
+  "https://www.myinstants.com/media/sounds/scream.mp3"
+];
+
+const images = [
+  "https://i.imgur.com/9ZQZ0ZP.jpg",
+  "https://i.imgur.com/6YV1FQn.jpg",
+  "https://i.imgur.com/0Z8FQyG.jpg"
+];
+
+function rand(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// unlock sound (для мобил)
+function unlockSound() {
+    const a = new Audio(rand(sounds));
+    a.volume = 1;
+    a.play().then(() => {
+        a.pause();
+        unlocked = true;
+        start.style.display = "none";
+    });
+}
+
+startBtn.onclick = unlockSound;
+
+// основной скример
+function bigScreamer() {
+    if (!unlocked) return;
+
+    const audio1 = new Audio(rand(sounds));
+    const audio2 = new Audio(rand(sounds));
+    audio1.volume = 1;
+    audio2.volume = 1;
+    audio1.play();
+    audio2.play();
+
+    screamerImg.src = rand(images);
+    screamer.style.display = "block";
+    flash.style.display = "block";
+
+    if (navigator.vibrate) navigator.vibrate([400,150,400,150,400]);
+
+    setTimeout(() => {
+        screamer.style.display = "none";
+        flash.style.display = "none";
+    }, 1200);
+}
+
+// кнопка NO — не убегает
+no.onclick = () => {
+    yesSize += 20;
+    yes.style.fontSize = yesSize + "px";
+    bigScreamer();
+};
+
+yes.onclick = () => {
+    document.body.innerHTML =
+      "<h1 style='color:white; text-align:center'>😌 Всё.<br>Ты котакбас.</h1>";
+};
+
+// рандомный скример
+setInterval(() => {
+    if (unlocked && Math.random() < 0.25) {
+        bigScreamer();
+    }
+}, 5000);
+
+</script>
+
+</body>
+</html>
